@@ -3,3 +3,4 @@ session.json
 key.json
 .wwebjs*/
 node_modules/
+.DS_Store
