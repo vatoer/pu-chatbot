@@ -3,7 +3,7 @@ import qrcode from "qrcode-terminal";
 import puppeteer from "puppeteer";
 import dotenv from "dotenv";
 import fs from "fs";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+//import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
@@ -13,6 +13,8 @@ import { Document } from "langchain/document";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
 import { createRetrievalChain } from "langchain/chains/retrieval";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+
 //import { GoogleAuth } from '@google-cloud/auth';
 
 // const auth = await GoogleAuth.default();
@@ -22,14 +24,27 @@ dotenv.config();
 // Load the service account key file
 const keyPath = 'key.json';
 const key = fs.readFileSync(keyPath);
-process.env.GOOGLE_APPLICATION_CREDENTIALS = key;
+process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
 
 const { Client, LocalAuth } = pkg;
 
-const model = new ChatVertexAI({
+// const model = new ChatVertexAI({
+//   model: "gemini-1.5-flash",
+//   temperature: 0,
+// });
+
+const model = new ChatGoogleGenerativeAI({
+  apiKey: process.env.API_KEY, // Use environment variable for credentials
   model: "gemini-1.5-flash",
-  temperature: 0,
+  temperature: 0, // Optionally adjust the temperature
+  // other params...
 });
+
+// const model = new GoogleGenerativeAI({
+//   credentials: process.env.API_KEY, // Use environment variable for credentials
+//   model: "gemini-1.5-flash",
+//   temperature: 0, // Optionally adjust the temperature
+// });
 
 const textSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000,
@@ -42,11 +57,11 @@ const syntheticData = fs.readFileSync("synthetic_data.txt", "utf-8");
 // Split the synthetic data into manageable chunks
 const docs = new Document({ content: syntheticData,metadata: {} });
 //const splits = await textSplitter.splitDocuments(docs);
-
 const embeddings = new GoogleGenerativeAIEmbeddings({
     model: "text-embedding-004", // 768 dimensions
     taskType: TaskType.RETRIEVAL_DOCUMENT,
     title: "Document title",
+    apiKey: process.env.API_KEY,
   });
 
 const vectorstore = await MemoryVectorStore.fromDocuments(
@@ -64,10 +79,13 @@ function handleError(err) {
 
 const systemTemplate = [
   `##Tentang
-    Kamu adalah customer service sebuah program beasiswa dari Kementerian Komunikasi dan Digital bernama program Stargan Bisnis Digital, Inovasi, dan Kewirausahaan dengan nama Rai. 
+    Kamu adalah customer service sebuah program beasiswa dari Kementerian Komunikasi dan Digital bernama program Stargan Bisnis Digital, Inovasi, dan Kewirausahaan dengan nama #Rai. 
 
     ##Tugas
     Tugas kamu adalah menjawab pertanyaan terkait mata kuliah. Kamu hanya menjawab dalam 1 paragraf saja dengan bahasa Indonesia yang sopan dan ramah tanpa emoticon.
+
+    ##Stargan
+    Perusahaan Stargan berdiri pada tahun 2020, dan terus meningkatkan layanannya sejak saat itu. Berlokasi di Kota Bandung, Stargan terus beradaptasi dengan teknologi baru yang siap diimplementasikan kepada klien tercinta. Stargan memberikan kontribusi kepada masyarakat dengan menyediakan kursus gratis tentang teknologi.
 
     ##Panggilan
     Selalu panggil dengan "Kak"/ "Kakak" / "Digiers" dan hindari memanggil dengan sebutan "Anda". 
@@ -98,15 +116,15 @@ const prompt = ChatPromptTemplate.fromMessages([
 ]);
 
 // Function to initialize the generative AI model
-function initializeGenerativeAI() {
+// function initializeGenerativeAI() {
     
-        return new GoogleGenerativeAI({
-          credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Use environment variable for credentials
-          model: "gemini-1.5-flash",
-          temperature: 0, // Optionally adjust the temperature
-        });
+//         return new GoogleGenerativeAI({
+//           credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Use environment variable for credentials
+//           model: "gemini-1.5-flash",
+//           temperature: 0, // Optionally adjust the temperature
+//         });
       
-}
+// }
 
 
 const questionAnswerChain = await createStuffDocumentsChain({
@@ -127,21 +145,53 @@ async function handleChat(model, inputMessage) {
   
       // 2. Use Langchain retrieval chain to find relevant data:
       const relevantData = await ragChain.invoke({ input: contextMessage });
+
+      console.log("Relevant data:", relevantData);
   
       // 3. Generate response using the model:
       let responseText;
       if (relevantData) {
         // Use relevant data to inform the response generation
-        responseText = await model.ChatPromptTemplate({
-          prompt: inputMessage + "\n" + relevantData, // Combine user message and retrieved data
-          maxOutputTokens: 200,
+        // responseText = await model.ChatPromptTemplate({
+        //   prompt: inputMessage + "\n" + relevantData, // Combine user message and retrieved data
+        //   maxOutputTokens: 200,
+        // });
+
+        const prompt = ChatPromptTemplate.fromMessages([
+          [
+            "system",
+            relevantData.input,
+            relevantData.answer,
+          ],
+          ["human", "{input}"],
+        ]);
+
+        const chain = prompt.pipe(model);
+
+        const responseText = await chain.invoke({
+          input: inputMessage,
         });
+
+        console.log("Response text:", responseText);
+
+        return responseText.content; // Return the model's text response
+
+        // // const mixedResponse = await model.ChatPromptTemplate({
+        // //   prompt: inputMessage + "\n" + relevantData,
+        // //   maxOutputTokens: 200,
+        // // });
+
+        // console.log("Mixed response:", mixedResponse);
+
+        // return mixedResponse.text;
+
       } else {
         // Fallback to model-only response if no relevant data found
-        responseText = await model.ChatPromptTemplate({
-          prompt: inputMessage,
-          maxOutputTokens: 200,
-        });
+        responseText = "Sorry, I don't have an answer for that.";
+        // responseText = await model.ChatPromptTemplate({
+        //   prompt: inputMessage,
+        //   maxOutputTokens: 200,
+        // });
       }
       return responseText.text; // Return the model's text response
     } catch (error) {
@@ -153,11 +203,6 @@ async function handleChat(model, inputMessage) {
 
 
 async function main() {
-  const syntheticData = loadSyntheticData();
-  const model = initializeGenerativeAI();
-
-  // Embed the synthetic data to create a vector store
-
   const client = new Client({
     authStrategy: new LocalAuth(), // Automatically saves the session in .wwebjs_auth/
     puppeteer: {
@@ -200,16 +245,18 @@ async function main() {
           Filename: ${attachmentData.filename || "unknown"}
           Data Size: ${attachmentData.data.length} bytes
         `;
-      } else {
+      } else if(message.startsWith("!q ")) {
         // const results = await ragChain.invoke({
         //     input: "What are you?",
         //   });
         // return results;
         // Get response from the model
-         const response = await handleChat(model, message);
+         const userMessage = message.slice(3); // Remove the "!q " prefix
+         const response = await handleChat(model, userMessage);
          //console.log(response);
          return response;
       }
+      return null; // Return null if no reply is needed
     };
 
     const replyText = await handleUserMessage(msg.body);
