@@ -140,6 +140,12 @@ prepare your whatsapp
 pnpm nodemon chat5.js
 ```
 
+atau
+
+```sh
+pnpm start
+```
+
 it will show you a qr code, scan with your whatsapp
 
 asking chatbot, chat to your whatsapp from other number in bahasa indonesia

@@ -5,8 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "chat": "nodemon chat2.js",
+    "start": "nodemon chat5.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
