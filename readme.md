@@ -146,7 +146,7 @@ Run chatbot
 prepare your whatsapp
 
 ```sh
-pnpm nodemon chat5.js
+pnpm nodemon chat6.js
 ```
 
 atau
