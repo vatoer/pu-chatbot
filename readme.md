@@ -12,6 +12,7 @@ figure 1. raichat answer base on its embedding text
 ---
 
 ### **1. Environment Setup**
+
 - **dotenv** is used to load environment variables from a `.env` file, such as `API_KEY` for Google Generative AI.
 - The Google service account key file (`key.json`) is set to `GOOGLE_APPLICATION_CREDENTIALS`.
 
@@ -20,6 +21,7 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **2. WhatsApp Client Initialization**
+
 - **`whatsapp-web.js`**:
   - Manages the interaction with WhatsApp via the web interface.
   - **`Client`** and **`LocalAuth`** are used to create and manage the authentication session.
@@ -33,6 +35,7 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **3. AI Model Setup**
+
 - **LangChain**: Provides a framework for working with language models and document retrieval.
 - **Google Generative AI**:
   - Chat model (`gemini-1.5-flash`) is used for generating human-like responses.
@@ -47,6 +50,7 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **4. AI Chains**
+
 - **Question Answering Chain**:
   - Processes questions and generates answers based on the AI model.
 - **Retrieval Augmented Generation (RAG)** Chain:
@@ -55,6 +59,7 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **5. Message Handling**
+
 - The `handleChat` function processes incoming WhatsApp messages:
   - Integrates the prompt template with the user's question.
   - Uses the RAG chain to retrieve relevant data.
@@ -68,16 +73,19 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **6. Error Handling**
+
 - The `handleError` function logs errors and ensures graceful handling of issues like authentication failures or disconnections.
 
 ---
 
 ### **7. Puppeteer Integration**
+
 - **Puppeteer**: Configured as the underlying browser engine for `whatsapp-web.js`, ensuring headless operation for automation.
 
 ---
 
 ### **8. Main Function**
+
 - The `main` function initializes the WhatsApp client:
   - Authenticates using the local strategy.
   - Sets up event listeners for logging in, receiving messages, and handling disconnections.
@@ -86,6 +94,7 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **Workflow Overview**
+
 1. **WhatsApp Login**:
    - User logs in via QR code.
    - Client becomes ready to handle messages.
@@ -104,20 +113,20 @@ we dont use vertex AI because of some payment issue
 ---
 
 ### **Features and Use Cases**
+
 - Automated customer service.
 - AI-enhanced question answering.
 - Integration of LangChain for advanced document retrieval.
 - Real-time WhatsApp messaging with dynamic responses.
-
 
 ## DEPLOYMENT
 
 Prerequisites
 
 - git
-- pnpm 
+- pnpm
 
-Clone and install 
+Clone and install
 
 ```sh
 git clone https://github.com/vatoer/pu-chatbot.git
@@ -180,6 +189,7 @@ To install Git, follow these steps based on your operating system:
 3. **Configure Git:**
    - Open Git Bash or Command Prompt.
    - Set your name and email:
+
      ```bash
      git config --global user.name "Your Name"
      git config --global user.email "your.email@example.com"
@@ -187,9 +197,11 @@ To install Git, follow these steps based on your operating system:
 
 4. **Verify Installation:**
    - Open Git Bash or Command Prompt and run:
+
      ```bash
      git --version
      ```
+
    - You should see the installed Git version.
 
 ---
@@ -198,26 +210,33 @@ To install Git, follow these steps based on your operating system:
 
 1. **Using Homebrew (Recommended):**
    - Install Homebrew if not already installed:
+
      ```bash
      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
      ```
+
    - Install Git using Homebrew:
+
      ```bash
      brew install git
      ```
 
 2. **Alternative: Install via Xcode Command Line Tools:**
    - Open Terminal and run:
+
      ```bash
      xcode-select --install
      ```
+
    - Follow the on-screen prompts to install Git.
 
 3. **Verify Installation:**
    - Open Terminal and run:
+
      ```bash
      git --version
      ```
+
    - You should see the installed Git version.
 
 ---
@@ -226,25 +245,33 @@ To install Git, follow these steps based on your operating system:
 
 1. **Using Package Managers:**
    - For **Debian/Ubuntu**:
+
      ```bash
      sudo apt update
      sudo apt install git
      ```
+
    - For **Fedora**:
+
      ```bash
      sudo dnf install git
      ```
+
    - For **CentOS/RHEL**:
+
      ```bash
      sudo yum install git
      ```
+
    - For **Arch Linux**:
+
      ```bash
      sudo pacman -S git
      ```
 
 2. **Verify Installation:**
    - Open a terminal and run:
+
      ```bash
      git --version
      ```
@@ -255,6 +282,7 @@ To install Git, follow these steps based on your operating system:
 
 1. **Configure Git User:**
    - Run these commands to set your name and email globally:
+
      ```bash
      git config --global user.name "Your Name"
      git config --global user.email "your.email@example.com"
@@ -262,12 +290,14 @@ To install Git, follow these steps based on your operating system:
 
 2. **Optional: Set a Default Editor:**
    - To set `vim`, `nano`, or another editor for Git:
+
      ```bash
      git config --global core.editor "nano"
      ```
 
 3. **Check Configuration:**
    - View your Git configuration:
+
      ```bash
      git config --list
      ```
@@ -275,39 +305,52 @@ To install Git, follow these steps based on your operating system:
 To install `pnpm`, you can follow these steps:
 
 ### 1. **Using `npm`**
+
 If you already have Node.js and `npm` installed, you can install `pnpm` globally with the following command:
+
 ```bash
 npm install -g pnpm
 ```
 
 ### 2. **Using Corepack**
+
 If you're using Node.js v16.13 or higher, `Corepack` comes pre-installed, which manages package managers like `pnpm`. You can enable `Corepack` and then use it to install `pnpm`:
+
 ```bash
 corepack enable
 corepack prepare pnpm@latest --activate
 ```
 
 ### 3. **Using a Script**
+
 If you prefer to install it directly without `npm`, use the following shell script:
+
 ```bash
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 ```
+
 This script downloads and installs `pnpm`.
 
 ### 4. **Verifying the Installation**
+
 After installation, verify that `pnpm` is installed correctly by checking its version:
+
 ```bash
 pnpm --version
 ```
 
 ### 5. **Alternative: Install via Homebrew (macOS/Linux)**
+
 If you're on macOS or Linux and use Homebrew, you can install `pnpm` like this:
+
 ```bash
 brew install pnpm
 ```
 
-### Notes:
+### Notes
+
 - If you're using Windows, you can follow the first or second method, or use [Scoop](https://scoop.sh/):
+
   ```bash
   scoop install pnpm
   ```
